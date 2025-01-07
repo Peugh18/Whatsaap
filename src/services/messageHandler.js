@@ -13,39 +13,64 @@ class MessageHandler {
         await whatsappService.sendMessage(message.from, response, message.id);
       }
       await whatsappService.markAsRead(message.id);
+    } else if (message?.type === 'interactive') {
+      const option = message?.interactive?.button_reply?.title.toLowerCase().trim();
+      await this.handleMenuOption(message.from, option);
+      await whatsappService.markAsRead(message.id);
     }
   }
 
   isGreeting(message) {
-    const greetings = ["hola", "hello", "hi", "buenas tardes","buenos días", "buenas noches"];
+    const greetings = ["hola", "hello", "hi", "buenas tardes", "buenos días", "buenas noches"];
     return greetings.includes(message);
   }
 
   getSenderName(senderInfo) {
-    return senderInfo?.profile?.name || senderInfo?.wa_id || 'Cliente';
+    return senderInfo.profile?.name || senderInfo.wa_id;
   }
 
-  async sendWelcomeMessage(to, messageId,senderInfo) {
+  async sendWelcomeMessage(to, messageId, senderInfo) {
     const name = this.getSenderName(senderInfo);
-    const welcomeMessage = `Hola ${name} , Bienvenido(a) a ShopLife, tu tienda de accesorios y más. ¿En qué puedo ayudarte hoy?`;
+    const welcomeMessage = `Hola ${name}, Bienvenido a ShopLife, tu tienda de accesorios y maás. ¿En qué puedo ayudarte hoy?`;
     await whatsappService.sendMessage(to, welcomeMessage, messageId);
   }
+
   async sendWelcomeMenu(to) {
     const menuMessage = "Elige una Opción"
     const buttons = [
       {
-        type: 'reply', reply: { id: 'option_1', title: 'Agendar' }
+        type: 'reply', reply: { id: 'option_1', title: 'Ver Productos' }
+      },
+      { 
+        type: 'reply', reply: { id: 'option_2', title: 'Promociones'}
       },
       {
-        type: 'reply', reply: { id: 'option_2', title: 'Consultar'}
-      },
-      {
-        type: 'reply', reply: { id: 'option_3', title: 'Ubicación'}
+        type: 'reply', reply: { id: 'option_3', title: 'Hablar con un Ases.'}
       }
     ];
 
     await whatsappService.sendInteractiveButtons(to, menuMessage, buttons);
   }
 
+  async handleMenuOption(to, option) {
+    console.log(option)
+    let response;
+    switch (option) {
+      case 'ver productos':
+        response = "Estos son nuestros productos";
+        break;
+      case 'promociones':
+        response = "Estas son nuestras promociones";
+        break
+      case 'hablar con un ases.': 
+       response = 'Un asesor se pondrá en contacto contigo en breve.';
+       break
+      default: 
+       response = "Lo siento, no entendí tu selección, Por Favor, elige una de las opciones del menú."
+    }
+    await whatsappService.sendMessage(to, response);
+  }
+
 }
+
 export default new MessageHandler();
