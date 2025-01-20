@@ -84,7 +84,7 @@ class WhatsAppService {
           mediaObject.video = { link: mediaUrl, caption: caption }
           break;
         case 'document':
-          mediaObject.document = { link: mediaUrl, caption: caption, filename: 'medpet.pdf' }
+          mediaObject.document = { link: mediaUrl, caption: caption, filename: 'productos.pdf' }
           break;
         default:
           throw new Error('Not Soported Media Type');
